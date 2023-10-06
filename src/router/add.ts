@@ -3,14 +3,6 @@ import type { Node, Router } from './types'
 import type { NonEmptyArray } from 'effect/ReadonlyArray'
 import { isNonEmptyArray } from 'effect/ReadonlyArray'
 
-type AddPayload = {
-	method: Method
-	path: string
-	handler: Handler
-}
-
-type AddFunc = (payload: AddPayload) => (router: Router) => Router
-
 const splitPath = (path: string): NonEmptyArray<string> => {
 	const segments = path.split('/')
 	if (segments[0] === '' && segments.length > 1) {
@@ -47,6 +39,14 @@ const insert = (node: Node, segments: string[], method: Method, handler: Handler
 
 	return { ...node, children: updatedChildren }
 }
+
+type AddPayload = {
+	method: Method
+	path: string
+	handler: Handler
+}
+
+type AddFunc = (payload: AddPayload) => (router: Router) => Router
 
 export const add: AddFunc =
 	({ method, path, handler }) =>

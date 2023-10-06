@@ -1,7 +1,8 @@
 import type { Handler, Method } from '../types'
 
+
 export type Router =
-	&{ basePath: string }
+	& { basePath: string }
 	& Node
 
 export type Node = {
