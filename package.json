@@ -26,6 +26,7 @@
     "vitest": "^0.34.6"
   },
   "dependencies": {
-    "effect": "2.0.0-next.45"
+    "@effect/schema": "^0.41.0",
+    "effect": "2.0.0-next.46"
   }
 }

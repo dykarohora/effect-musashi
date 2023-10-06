@@ -1,5 +1,5 @@
-import type { Handler, Method } from '../types'
-import type { Node, Router } from './types'
+import type { Method } from '../types'
+import type { HandlerWithSchema, Node, Router } from './types'
 import type { NonEmptyArray } from 'effect/ReadonlyArray'
 import { isNonEmptyArray } from 'effect/ReadonlyArray'
 
@@ -18,13 +18,21 @@ const splitPath = (path: string): NonEmptyArray<string> => {
 
 const createNode = (): Node => ({ handlers: {}, children: {} })
 
-const insert = (node: Node, segments: string[], method: Method, handler: Handler): Node => {
+type InsertPayload<O, I = never> =
+	& {
+		node: Node,
+		segments: string[],
+		method: Method,
+	}
+	& HandlerWithSchema<O, I>
+
+const insert = <O, I = never>({ node, segments, method, schema, handler }: InsertPayload<O, I>): Node => {
 	if (!isNonEmptyArray(segments)) {
 		return {
 			...node,
 			handlers: {
 				...node.handlers,
-				[method]: handler
+				[method]: { schema, handler }
 			}
 		}
 	}
@@ -34,22 +42,23 @@ const insert = (node: Node, segments: string[], method: Method, handler: Handler
 
 	const updatedChildren = {
 		...node.children,
-		[head]: insert(nextNode, tail, method, handler)
+		[head]: insert({ node: nextNode, segments: tail, method, schema, handler })
 	}
 
 	return { ...node, children: updatedChildren }
 }
 
-type AddPayload = {
-	method: Method
-	path: string
-	handler: Handler
-}
+type AddPayload<O, I = never> =
+	& {
+		method: Method
+		path: string
+	}
+	& HandlerWithSchema<O, I>
 
-type AddFunc = (payload: AddPayload) => (router: Router) => Router
+type AddFunc = <O, I = never>(payload: AddPayload<O, I>) => (router: Router) => Router
 
 export const add: AddFunc =
-	({ method, path, handler }) =>
+	({ method, path, schema, handler }) =>
 		(router) => {
 			const segments = splitPath(path)
 			const [head, ...tail] = segments
@@ -59,12 +68,12 @@ export const add: AddFunc =
 					...router,
 					handlers: {
 						...router.handlers,
-						[method]: handler
+						[method]: { schema, handler }
 					}
 				}
 			}
 
-			const { handlers, children } = insert(router, segments, method, handler)
+			const { handlers, children } = insert({ node: router, segments, method, schema, handler })
 
 			return {
 				basePath: router.basePath,
