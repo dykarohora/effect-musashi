@@ -48,5 +48,12 @@ describe('match', () => {
 		}
 
 		expect(result2.left).toBeInstanceOf(NotFoundHandlerError)
+
+		const result3 = sut({ method: 'post', path: '/posts' })
+		if (Either.isRight(result3)) {
+			throw new Error('test failed')
+		}
+
+		expect(result3.left).toBeInstanceOf(NotFoundHandlerError)
 	})
 })
