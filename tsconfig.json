@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "lib": ["es2023"],
+    "lib": ["es2023", "dom"],
     "module": "node16",
     "moduleResolution": "node16",
     "target": "es2022",
     "rootDir": "./src",
     "outDir": "./build",
     "types": [
-      "vitest/globals"
+      "vitest/globals",
+      "@cloudflare/workers-types"
     ],
     "strict": true,                                      /* Enable all strict type-checking options. */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */

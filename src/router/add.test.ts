@@ -14,11 +14,46 @@ describe('add', () => {
 	it('Get handler can be registered for the base path.', () => {
 		const router = pipe(
 			createRouter('/'),
-			add({ method: 'get', path: '/', schema, handler })
+			add({
+				method: 'get', path: '/posts',
+				schema: {
+					output: 'stream'
+				},
+				handler: () => new ReadableStream()
+			}),
+			add({
+				method: 'post', path: '/posts',
+				schema: {
+					output: 'stream',
+					input: S.struct({ id: S.string })
+				},
+				handler: ({ id }) => new ReadableStream()
+			}),
+			add({
+				method: 'patch', path: '/posts',
+				schema: {
+					output: S.struct({ name: S.string, age: S.number })
+				},
+				handler: () => ({ name: 'hoge', age: 5 })
+			}),
+			add({
+				method: 'put', path: '/posts',
+				schema: {
+					output: S.struct({ name: S.string, age: S.number }),
+					input: S.struct({ id: S.string })
+				},
+				handler: ({ id }) => ({ name: id, age: 5 })
+			})
 		)
 
-		expect(router.handlers.get?.handler).toBeDefined()
-		expect(router.handlers.get?.schema).toBeDefined()
+		expect(router.children.posts?.handlers.get?.handler).toBeDefined()
+		expect(router.children.posts?.handlers.get?.schema).toBeDefined()
+		expect(router.children.posts?.handlers.post?.handler).toBeDefined()
+		expect(router.children.posts?.handlers.post?.schema).toBeDefined()
+		expect(router.children.posts?.handlers.patch?.handler).toBeDefined()
+		expect(router.children.posts?.handlers.patch?.schema).toBeDefined()
+		expect(router.children.posts?.handlers.put?.handler).toBeDefined()
+		expect(router.children.posts?.handlers.put?.schema).toBeDefined()
 	})
 
 	it('Handlers can be registered for each HTTP method for a single path.', () => {
