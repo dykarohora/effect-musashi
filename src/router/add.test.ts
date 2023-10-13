@@ -1,4 +1,4 @@
-import { pipe } from 'effect'
+import { Effect, pipe } from 'effect'
 import { Schema as S } from '@effect/schema'
 import { add } from './add'
 import { createRouter } from './createRouter'
@@ -9,8 +9,6 @@ describe('add', () => {
 		output: S.struct({ name: S.string, age: S.number })
 	}
 
-	const handler = (input: { readonly id: string }) => ({ name: input.id, age: 42 })
-
 	it('Get handler can be registered for the base path.', () => {
 		const router = pipe(
 			createRouter('/'),
@@ -19,7 +17,10 @@ describe('add', () => {
 				schema: {
 					output: 'stream'
 				},
-				handler: () => new ReadableStream()
+				handler: () => Effect.succeed({
+					status: 200,
+					body: new ReadableStream()
+				})
 			}),
 			add({
 				method: 'post', path: '/posts',
@@ -27,14 +28,20 @@ describe('add', () => {
 					output: 'stream',
 					input: S.struct({ id: S.string })
 				},
-				handler: ({ id }) => new ReadableStream()
+				handler: () => Effect.succeed({
+					status: 200,
+					body: new ReadableStream()
+				})
 			}),
 			add({
 				method: 'patch', path: '/posts',
 				schema: {
 					output: S.struct({ name: S.string, age: S.number })
 				},
-				handler: () => ({ name: 'hoge', age: 5 })
+				handler: () => Effect.succeed({
+					status: 200,
+					body: { name: 'hoge', age: 42 }
+				})
 			}),
 			add({
 				method: 'put', path: '/posts',
@@ -42,7 +49,10 @@ describe('add', () => {
 					output: S.struct({ name: S.string, age: S.number }),
 					input: S.struct({ id: S.string })
 				},
-				handler: ({ id }) => ({ name: id, age: 5 })
+				handler: ({ id }) => Effect.succeed({
+					status: 200,
+					body: { name: id, age: 42 }
+				})
 			})
 		)
 
@@ -57,6 +67,14 @@ describe('add', () => {
 	})
 
 	it('Handlers can be registered for each HTTP method for a single path.', () => {
+		const handler =
+			(input: { readonly id: string }) =>
+				Effect.succeed({
+					status: 200,
+					headers: { 'content-type': 'application/json' },
+					body: { name: input.id, age: 42 }
+				})
+
 		const router = pipe(
 			createRouter('/'),
 			add({ method: 'get', path: '/posts', schema, handler, }),
@@ -70,6 +88,14 @@ describe('add', () => {
 	})
 
 	it('The path is divided into segments with the slash as the delimiter, and each segment is a node in the tri-tree.', () => {
+		const handler =
+			(input: { readonly id: string }) =>
+				Effect.succeed({
+					status: 200,
+					headers: { 'content-type': 'application/json' },
+					body: { name: input.id, age: 42 }
+				})
+
 		const router = pipe(
 			createRouter('/'),
 			add({ method: 'get', path: '/posts', handler, schema }),
@@ -86,6 +112,14 @@ describe('add', () => {
 	})
 
 	it('Router is immutable.', () => {
+		const handler =
+			(input: { readonly id: string }) =>
+				Effect.succeed({
+					status: 200,
+					headers: { 'content-type': 'application/json' },
+					body: { name: input.id, age: 42 }
+				})
+
 		const router = createRouter('/')
 		const updatedRouter = add({ method: 'get', path: '/', handler, schema })(router)
 

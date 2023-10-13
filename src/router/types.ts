@@ -29,7 +29,7 @@ export type Handler<O, I = undefined> =
 			? () => O
 			: (input: I) => O
 
-export type HandlerWithSchema<O = 'stream', I = undefined> = {
+export type HandlerWithSchema<O = any, I = any> = {
 	schema: HandlerSchema<O, I>
 	handler: Handler<O, I>
 }

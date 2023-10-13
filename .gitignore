@@ -127,6 +127,7 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+build
 
 # Gatsby files
 .cache/
@@ -418,3 +419,5 @@ modules.xml
 *.ipr
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,web,webstorm+all,webstorm+iml,webstorm,node
+
+.wrangler

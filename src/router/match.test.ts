@@ -1,5 +1,5 @@
 import { Schema as S } from '@effect/schema'
-import { pipe, Either } from 'effect'
+import { pipe, Either, Effect } from 'effect'
 import { createRouter } from './createRouter'
 import { add } from './add'
 import { match } from './match'
@@ -11,7 +11,13 @@ describe('match', () => {
 		output: S.struct({ name: S.string, age: S.number })
 	}
 
-	const handler = (input: { readonly id: string }) => ({ name: input.id, age: 42 })
+	const handler =
+		(input: { readonly id: string }) =>
+			Effect.succeed({
+				status: 200,
+				headers: { 'content-type': 'application/json' },
+				body: { name: input.id, age: 42 }
+			})
 
 	const router = pipe(
 		createRouter('/'),
@@ -44,6 +50,7 @@ describe('match', () => {
 
 		const result2 = sut({ method: 'get', path: '/posts/details' })
 		if (Either.isRight(result2)) {
+			const a = result2.right.handler
 			throw new Error('test failed')
 		}
 
