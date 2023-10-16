@@ -4,6 +4,6 @@ export const createRouter =
 	(basePath?: string): Router =>
 		({
 			basePath: basePath ?? '/',
-			handlers: {},
+			requestHandlers: {},
 			children: {},
 		})

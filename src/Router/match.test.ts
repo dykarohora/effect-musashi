@@ -1,29 +1,47 @@
 import { Schema as S } from '@effect/schema'
 import { pipe, Either, Effect } from 'effect'
+import { NotFoundHandlerError } from '../error'
 import { createRouter } from './createRouter'
 import { add } from './add'
+import { make } from '../RequestHandler'
 import { match } from './match'
-import { NotFoundHandlerError } from '../error'
 
 describe('match', () => {
-	const schema = {
-		input: S.struct({ id: S.string }),
-		output: S.struct({ name: S.string, age: S.number })
-	}
-
-	const handler =
-		(input: { readonly id: string }) =>
-			Effect.succeed({
-				status: 200,
-				headers: { 'content-type': 'application/json' },
-				body: { name: input.id, age: 42 }
-			})
-
 	const router = pipe(
 		createRouter('/'),
-		add({ method: 'get', path: '/posts', handler, schema }),
-		add({ method: 'get', path: '/posts/summary', handler, schema }),
-		add({ method: 'post', path: '/posts/category', handler, schema, })
+		add(
+			make({
+				schema: {
+					method: 'get',
+					path: '/posts',
+					output: { body: S.struct({ name: S.string, age: S.number }) },
+					input: { body: S.struct({ id: S.string }) }
+				},
+				handler: ({ body: { id } }) => Effect.succeed({ status: 200, body: { name: id, age: 42 } })
+			})
+		),
+		add(
+			make({
+				schema: {
+					method: 'get',
+					path: '/posts/summary',
+					output: { body: S.struct({ name: S.string, age: S.number }) },
+					input: { body: S.struct({ id: S.string }) }
+				},
+				handler: ({ body: { id } }) => Effect.succeed({ status: 200, body: { name: id, age: 42 } })
+			})
+		),
+		add(
+			make({
+				schema: {
+					method: 'post',
+					path: '/posts/category',
+					output: { body: S.struct({ name: S.string, age: S.number }) },
+					input: { body: S.struct({ id: S.string }) }
+				},
+				handler: ({ body: { id } }) => Effect.succeed({ status: 200, body: { name: id, age: 42 } })
+			})
+		),
 	)
 
 	const sut = match(router)
@@ -50,7 +68,6 @@ describe('match', () => {
 
 		const result2 = sut({ method: 'get', path: '/posts/details' })
 		if (Either.isRight(result2)) {
-			const a = result2.right.handler
 			throw new Error('test failed')
 		}
 
